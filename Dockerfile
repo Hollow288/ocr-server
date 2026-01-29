@@ -9,6 +9,14 @@ ENV PYTHONUNBUFFERED=1 \
     FLAGS_enable_mkldnn=0 \
     FLAGS_enable_onednn=0
 
+
+RUN apt-get update && apt-get install -y \
+    libgl1 \
+    libglib2.0-0 \
+    libgomp1 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # 安装 Poetry
 RUN pip install --upgrade pip \
     && pip install poetry
