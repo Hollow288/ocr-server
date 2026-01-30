@@ -1,37 +1,29 @@
-# 基础镜像
-FROM python:3.13-slim
+# 必须改为 3.10，因为 rapidocr 不支持 3.13
+FROM python:3.10-slim
 
-# 必须在 install 前设置
 ENV PYTHONUNBUFFERED=1 \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_CREATE=false \
-    KMP_DUPLICATE_LIB_OK=TRUE \
-    FLAGS_enable_mkldnn=0 \
-    FLAGS_enable_onednn=0
+    POETRY_VIRTUALENVS_CREATE=false
 
-
+# 安装系统库
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
-    libgomp1 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装 Poetry
-RUN pip install --upgrade pip \
-    && pip install poetry
+RUN pip install --no-cache-dir poetry
 
-# 复制项目
 WORKDIR /app
-COPY pyproject.toml poetry.lock ./
 
-# 安装依赖（直接到系统 Python）
-RUN poetry install --no-root
+COPY pyproject.toml poetry.lock* /app/
 
-# 复制代码
-COPY . .
+RUN poetry install --no-root --no-interaction --no-dev
 
-# 暴露端口
+COPY . /app
+
 EXPOSE 8000
 
-CMD ["python", "main.py"]
+CMD ["uvicorn", "api_server:app", "--host", "0.0.0.0", "--port", "8000"]
