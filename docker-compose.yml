@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  ocr-api:
+    image: hollow288/ocr-server:latest
+    container_name: ocr-service
+    restart: always
+    pull_policy: always
+    ports:
+      - "127.0.0.1:7634:8000"
+    environment:
+      - OCR_API_KEY=${OCR_API_KEY}
