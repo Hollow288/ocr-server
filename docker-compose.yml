@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   ocr-api:
     image: hollow288/ocr-server:latest
@@ -9,3 +8,20 @@ services:
       - "127.0.0.1:7634:8000"
     environment:
       - OCR_API_KEY=${OCR_API_KEY}
+      - PDF_DPI=${PDF_DPI:-200}
+      - PDF_MAX_PAGES=${PDF_MAX_PAGES:-50}
+      - URL_DOWNLOAD_TIMEOUT=${URL_DOWNLOAD_TIMEOUT:-15}
+      - URL_MAX_BYTES=${URL_MAX_BYTES:-52428800}
+      - URL_MAX_REDIRECTS=${URL_MAX_REDIRECTS:-3}
+      - ALLOW_PRIVATE_URLS=${ALLOW_PRIVATE_URLS:-false}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
