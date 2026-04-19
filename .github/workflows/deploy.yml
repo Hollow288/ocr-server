@@ -13,27 +13,29 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2  # 获取仓库代码
+        uses: actions/checkout@v4
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2  # 配置 Docker 构建工具
-
-      - name: Build Docker image
-        run: |
-          docker build -t hollow288/ocr-server:latest .  # 使用 Dockerfile 构建镜像
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}  # GitHub Secrets 中配置的 Docker Hub 用户名
-          password: ${{ secrets.DOCKER_PASSWORD }}  # GitHub Secrets 中配置的 Docker Hub 密码
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push Docker image to Docker Hub
-        run: |
-          docker push hollow288/ocr-server:latest  # 推送到 Docker Hub
+      - name: Build and push multi-arch image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: hollow288/ocr-server:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
   #Todo 自动部署这一部分有问题,未解决,貌似是SSH连接时出现了问题
   deploy:
     runs-on: ubuntu-latest
