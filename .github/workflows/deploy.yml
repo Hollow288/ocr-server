@@ -3,20 +3,33 @@ name: Deploy to Remote Server
 on:
   push:
     branches:
-      - master  # 仅当代码推送到 master 分支时触发
+      - master
     tags:
-      - 'v*'  # 仅当推送的是以 "v" 开头的 tag 时触发
+      - 'v*'
+
+env:
+  IMAGE: hollow288/ocr-server
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # 使用 GitHub 提供的最新 Ubuntu 环境
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Prepare platform pair
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -27,35 +40,81 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push multi-arch image
+      - name: Build and push by digest
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
           push: true
-          tags: hollow288/ocr-server:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          provenance: false
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true
+          cache-from: type=gha,scope=${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=${{ env.PLATFORM_PAIR }}
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create multi-arch manifest
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create -t ${{ env.IMAGE }}:latest \
+            $(printf '${{ env.IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: docker buildx imagetools inspect ${{ env.IMAGE }}:latest
+
   #Todo 自动部署这一部分有问题,未解决,貌似是SSH连接时出现了问题
   deploy:
     runs-on: ubuntu-latest
 
-    needs: build  # 需要在构建镜像后才执行部署
+    needs: merge
 
-    # 只有在标签是以 "v" 开头的版本时才会执行
-    if: startsWith(github.ref, 'refs/tags/v')  # 检查是否是以 "v" 开头的标签
+    if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up SSH
-        uses: appleboy/ssh-action@v1.2.0  # 使用 SSH 连接远程服务器
+        uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SERVER_IP }}  # 远程服务器 IP 地址，使用 GitHub Secrets
-          username: ${{ secrets.SERVER_USER }}  # 远程服务器用户名，使用 GitHub Secrets
-          key: ${{ secrets.SERVER_SSH_KEY }}  # SSH 密钥，使用 GitHub Secrets
-          port: 22  # 如果使用非标准端口，修改端口号
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
 
       - name: Deploy to remote server
         run: |

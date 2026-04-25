@@ -10,6 +10,8 @@ class Settings:
     URL_MAX_BYTES: int = int(os.getenv("URL_MAX_BYTES", str(50 * 1024 * 1024)))
     URL_MAX_REDIRECTS: int = int(os.getenv("URL_MAX_REDIRECTS", "3"))
     ALLOW_PRIVATE_URLS: bool = os.getenv("ALLOW_PRIVATE_URLS", "false").lower() in ("1", "true", "yes")
+    UPLOAD_MAX_BYTES: int = int(os.getenv("UPLOAD_MAX_BYTES", str(50 * 1024 * 1024)))
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
 
 
 settings = Settings()
