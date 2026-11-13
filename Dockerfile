@@ -1,4 +1,4 @@
-# 必须改为 3.10，因为 rapidocr 不支持 3.13
+# ONNX Runtime 1.23.2 提供 Python 3.10 的 AMD64 / ARM64 CPU wheels。
 FROM python:3.10-slim
 
 ENV PYTHONUNBUFFERED=1 \
@@ -20,7 +20,8 @@ WORKDIR /app
 
 COPY pyproject.toml poetry.lock* /app/
 
-RUN poetry install --no-root --no-interaction --only main
+RUN poetry install --no-root --no-interaction --only main \
+    && rapidocr download_models
 
 COPY . /app
 

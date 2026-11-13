@@ -1,10 +1,13 @@
 import sys
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 _fake_rapidocr = MagicMock()
-_fake_engine_instance = MagicMock(return_value=([], 0.0))
+_fake_engine_instance = MagicMock(
+    return_value=SimpleNamespace(boxes=None, txts=None, scores=None, elapse=0.0)
+)
 _fake_rapidocr.RapidOCR = MagicMock(return_value=_fake_engine_instance)
-sys.modules["rapidocr_onnxruntime"] = _fake_rapidocr
+sys.modules["rapidocr"] = _fake_rapidocr
 
 import pytest
 from fastapi.testclient import TestClient
@@ -27,4 +30,11 @@ def api_key():
 
 @pytest.fixture
 def fake_engine():
-    return _fake_engine_instance
+    _fake_engine_instance.reset_mock()
+    _fake_engine_instance.return_value = SimpleNamespace(
+        boxes=None, txts=None, scores=None, elapse=0.0
+    )
+    yield _fake_engine_instance
+    _fake_engine_instance.return_value = SimpleNamespace(
+        boxes=None, txts=None, scores=None, elapse=0.0
+    )

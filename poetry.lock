@@ -217,6 +217,23 @@ humanfriendly = ">=9.1"
 cron = ["capturer (>=2.4)"]
 
 [[package]]
+name = "colorlog"
+version = "6.12.0"
+description = "Add colours to the output of Python's logging module."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "colorlog-6.12.0-py3-none-any.whl", hash = "sha256:30d392604e9110045a2c2aeefc27d7a017abbab63f3a8aee594eac0801df784e"},
+    {file = "colorlog-6.12.0.tar.gz", hash = "sha256:2a7924c1dadf18b22a0eb8b06d1c7b01d5341707ec1641eb6fcc4fde0c3e8e5f"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "sys_platform == \"win32\""}
+
+[package.extras]
+development = ["black", "flake8", "mypy", "pytest", "types-colorama"]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.3.1"
 description = "Backport of PEP 654 (exception groups)"
@@ -352,13 +369,13 @@ all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2
 
 [[package]]
 name = "iniconfig"
-version = "2.3.0"
+version = "2.3.1"
 description = "brain-dead simple config-ini parsing"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "iniconfig-2.3.0-py3-none-any.whl", hash = "sha256:f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12"},
-    {file = "iniconfig-2.3.0.tar.gz", hash = "sha256:c76315c77db068650d49c5b56314774a7804df16fee4402c1f19d6d15d8c4730"},
+    {file = "iniconfig-2.3.1-py3-none-any.whl", hash = "sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7"},
+    {file = "iniconfig-2.3.1.tar.gz", hash = "sha256:67f4b9c50da0dedf52af349e7749a80a9057a5031199791b906c3bb3ae878960"},
 ]
 
 [[package]]
@@ -443,6 +460,23 @@ files = [
 ]
 
 [[package]]
+name = "omegaconf"
+version = "2.4.0"
+description = "A flexible configuration library"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "omegaconf-2.4.0-py3-none-any.whl", hash = "sha256:f141a664c777582405e3cc6e0545ecc79429e79f844995b1a6e71c35946a025c"},
+    {file = "omegaconf-2.4.0.tar.gz", hash = "sha256:7e219a70bea371da250285b9c01c7db027bc421722799c2cc4ff14bc4a2a753b"},
+]
+
+[package.dependencies]
+PyYAML = ">=5.1.0"
+
+[package.extras]
+dev = ["PyYAML (>=5.1.0)", "attrs", "build", "bump-my-version", "coveralls", "nox[pbs]", "pre-commit", "pydevd", "pyrefly (==1.2.0)", "pytest", "pytest-benchmark", "pytest-mock", "ruff (==0.15.22)", "sphinx", "sphinx-tabs", "towncrier", "twine"]
+
+[[package]]
 name = "onnxruntime"
 version = "1.23.2"
 description = "ONNX Runtime is a runtime accelerator for Machine Learning models"
@@ -480,26 +514,6 @@ numpy = ">=1.21.6"
 packaging = "*"
 protobuf = "*"
 sympy = "*"
-
-[[package]]
-name = "opencv-python"
-version = "4.13.0.90"
-description = "Wrapper package for OpenCV python bindings."
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "opencv_python-4.13.0.90-cp37-abi3-macosx_13_0_arm64.whl", hash = "sha256:58803f8b05b51d8a785e2306d83b44173b32536f980342f3bc76d8c122b5938d"},
-    {file = "opencv_python-4.13.0.90-cp37-abi3-macosx_14_0_x86_64.whl", hash = "sha256:a5354e8b161409fce7710ba4c1cfe88b7bb460d97f705dc4e714a1636616f87d"},
-    {file = "opencv_python-4.13.0.90-cp37-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:d557cbf0c7818081c9acf56585b68e781af4f00638971f75eaa3de70904a6314"},
-    {file = "opencv_python-4.13.0.90-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:9911581e37b24169e4842069ff01d6645ea2bc4af7e10a022d9ebe340fd035ec"},
-    {file = "opencv_python-4.13.0.90-cp37-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:1150b8f1947761b848bbfa9c96ceba8877743ffef157c08a04af6f7717ddd709"},
-    {file = "opencv_python-4.13.0.90-cp37-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:d6716f16149b04eea52f953b8ca983d60dd9cd4872c1fd5113f6e2fcebb90e93"},
-    {file = "opencv_python-4.13.0.90-cp37-abi3-win32.whl", hash = "sha256:458a00f2ba47a877eca385be3e7bcc45e6d30a4361d107ce73c1800f516dab09"},
-    {file = "opencv_python-4.13.0.90-cp37-abi3-win_amd64.whl", hash = "sha256:526bde4c33a86808a751e2bb57bf4921beb49794621810971926c472897f6433"},
-]
-
-[package.dependencies]
-numpy = {version = ">=2", markers = "python_version >= \"3.9\""}
 
 [[package]]
 name = "opencv-python-headless"
@@ -1095,25 +1109,30 @@ files = [
 ]
 
 [[package]]
-name = "rapidocr-onnxruntime"
-version = "1.4.4"
-description = "A cross platform OCR Library based on OnnxRuntime."
+name = "rapidocr"
+version = "3.10.0"
+description = "Awesome OCR Library"
 optional = false
-python-versions = "<3.13,>=3.6"
+python-versions = "<4,>=3.8"
 files = [
-    {file = "rapidocr_onnxruntime-1.4.4-py3-none-any.whl", hash = "sha256:971d7d5f223a7a808662229df1ef69893809d8457d834e6373d3854bc1782cbf"},
+    {file = "rapidocr-3.10.0-py3-none-any.whl", hash = "sha256:2fc34e26cd0f48514804a94f8832283039c7334076bff60768b1fed9ad068050"},
 ]
 
 [package.dependencies]
+colorlog = "*"
 numpy = ">=1.19.5,<3.0.0"
-onnxruntime = ">=1.7.0"
-opencv-python = ">=4.5.1.48"
+omegaconf = "!=2.2.1"
+opencv-python-headless = ">=4.5.1.48"
 Pillow = "*"
 pyclipper = ">=1.2.0"
 PyYAML = "*"
+requests = "*"
 Shapely = ">=1.7.1,<2.0.4 || >2.0.4"
 six = ">=1.15.0"
 tqdm = "*"
+
+[package.extras]
+rtl = ["python-bidi (>=0.4.2,<1.0)"]
 
 [[package]]
 name = "requests"
@@ -1407,4 +1426,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10"
-content-hash = "23deba2ffca78022634e4c08922f4747c24437c3402eaaaa8f21203e325eb233"
+content-hash = "73d19171db3288cd6f135ba97b0894f4cab98fd037e9b09f35efb664d8706349"

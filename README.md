@@ -2,6 +2,8 @@
 
 基于 [RapidOCR (ONNX Runtime)](https://github.com/RapidAI/RapidOCR) + FastAPI 的轻量 OCR 服务，支持图片与 PDF 识别，支持本地文件上传与远程 URL 拉取。
 
+OCR 引擎固定为 `rapidocr==3.10.0`，默认使用 **PP-OCRv6 small 检测及识别模型**，通过 `onnxruntime==1.23.2` 在 CPU 上推理。Python 3.10 和该推理后端均支持 `linux/amd64` / `linux/arm64`；这里的 ARM 指 64 位 ARM。
+
 ## 特性
 
 - 图片 OCR：JPG / PNG / BMP / WebP / **HEIC / HEIF** 等 Pillow 支持的格式
@@ -27,10 +29,13 @@ docker compose up -d
 
 服务默认监听 `127.0.0.1:7634`（容器内 `8000`）。
 
+镜像在构建时执行 `rapidocr download_models` 准备模型，运行时无需联网下载。GitHub Actions 会在原生 AMD64 和 ARM64 runner 上构建镜像，并对每个镜像执行断网的真实 OCR 检查，通过后才合并发布多架构 `latest` 标签。
+
 ### 本地运行
 
 ```bash
 poetry install
+poetry run rapidocr download_models
 poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
@@ -279,7 +284,15 @@ poetry install --with dev
 poetry run pytest tests/
 ```
 
-测试在 `tests/conftest.py` 里 stub 掉了 `rapidocr_onnxruntime`，所以无需加载真实 ONNX 模型即可跑全套校验/安全边界测试（鉴权、SSRF、上传大小、PDF 页数、URL 重定向、base64 解码等）。
+测试在 `tests/conftest.py` 里 stub 掉了 `rapidocr`，所以无需加载真实 ONNX 模型即可跑接口及安全边界测试（鉴权、SSRF、上传大小、PDF 页数、URL 重定向、base64 解码等），并验证新版 OCR 返回值与三种 API 返回模式、坐标、置信度过滤的兼容性。
+
+真实模型检查需在 pytest 之外单独运行，避免模拟引擎影响结果：
+
+```bash
+poetry run python -m scripts.smoke_ocr
+```
+
+该检查会生成测试图片并执行真实的完整 OCR 流程。镜像构建流程也会运行它，用于验证目标架构的推理后端和模型是否可用；实际识别准确率和吞吐量仍需使用业务样本在部署机器上测量。
 
 ## OpenAPI 文档
 

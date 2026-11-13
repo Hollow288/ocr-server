@@ -1,16 +1,14 @@
-from rapidocr_onnxruntime import RapidOCR
+from rapidocr import RapidOCR
 
 _engine = RapidOCR()
 
 
 def run_ocr(img_np):
-    result, elapse = _engine(img_np)
-    return result, _elapse_to_seconds(elapse)
-
-
-def _elapse_to_seconds(elapse) -> float:
-    if elapse is None:
-        return 0.0
-    if isinstance(elapse, (list, tuple)):
-        return float(sum(e for e in elapse if e is not None))
-    return float(elapse)
+    output = _engine(img_np)
+    if output.boxes is None or output.txts is None or output.scores is None:
+        return [], float(output.elapse)
+    result = [
+        [box.tolist(), text, float(score)]
+        for box, text, score in zip(output.boxes, output.txts, output.scores)
+    ]
+    return result, float(output.elapse)

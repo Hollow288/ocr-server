@@ -52,6 +52,12 @@ jobs:
           cache-from: type=gha,scope=${{ env.PLATFORM_PAIR }}
           cache-to: type=gha,mode=max,scope=${{ env.PLATFORM_PAIR }}
 
+      - name: Test real OCR on native architecture without network
+        run: |
+          docker run --rm --network none --entrypoint python \
+            '${{ env.IMAGE }}@${{ steps.build.outputs.digest }}' \
+            -m scripts.smoke_ocr
+
       - name: Export digest
         run: |
           mkdir -p /tmp/digests

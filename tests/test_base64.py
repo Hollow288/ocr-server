@@ -21,7 +21,6 @@ def test_empty_payload_rejected(client, api_key):
 
 
 def test_data_url_prefix_stripped(client, api_key, fake_engine):
-    fake_engine.return_value = ([], 0.0)
     raw = b"\x89PNG\r\n\x1a\nfake"
     payload = "data:image/png;base64," + base64.b64encode(raw).decode()
     r = client.post(
